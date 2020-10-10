@@ -43,9 +43,18 @@ public class RedisCache {
 
     /**
      * 设置缓存， 设置过期时间, 如果建不存在则新增，存在则不改变已有的值
+     * 相当于 redis 中的 setnx 的方法
      * */
-    public void setIfAbsent(String key, Object value, Long timeout){
-        redisTemplate.opsForValue().setIfAbsent(key, value, timeout, TimeUnit.SECONDS);
+    public boolean setIfAbsent(String key, Object value, Long timeout){
+        return redisTemplate.opsForValue().setIfAbsent(key, value, timeout, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 设置缓存， 设置过期时间, 如果键不存在则新增，存在则不改变已有的值
+     * 相当于 redis 中的 setnx 的方法
+     * */
+    public boolean setIfAbsent(String key, String value){
+        return redisTemplate.opsForValue().setIfAbsent(key, value);
     }
 
     /**
@@ -53,6 +62,13 @@ public class RedisCache {
      * */
     public Object get(String key){
         return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 设置新值返回旧值
+     * */
+    public Object getAndSet(String key, String value){
+        return redisTemplate.opsForValue().getAndSet(key, value);
     }
 
     /**
@@ -117,6 +133,13 @@ public class RedisCache {
             }
         };
         redisTemplate.execute(sessionCallback);
+    }
+
+    /**
+     * 通过key删除缓存
+     * */
+    public boolean del(String key) {
+        return redisTemplate.opsForValue().getOperations().delete(key);
     }
 
 }

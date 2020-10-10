@@ -1,5 +1,6 @@
 package com.lb.redis.service.impl;
 import com.lb.redis.component.cache.RedisCache;
+import com.lb.redis.component.cache.RedisLock;
 import com.lb.redis.constant.RedisKey;
 import com.lb.redis.entity.User;
 import com.lb.redis.service.UserService;
@@ -22,6 +23,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     RedisCache redisCache;
+
+    @Autowired
+    RedisLock redisLock;
 
     @Override
     public int insert(User user) {
@@ -52,5 +56,19 @@ public class UserServiceImpl implements UserService {
         List<User> users = (List<User>) redisCache.getObjects(RedisKey.USER_OBJ_INFO);
         log.info("users: {}", users);
         return users;
+    }
+
+    @Override
+    public int update(User user) {
+        String lockKey = "userLock";
+        Long expireTime = 3000L;
+        String value = String.valueOf(expireTime+System.currentTimeMillis());
+        int id = user.getId();
+        boolean lockFlag = redisLock.lock(lockKey, value);
+        if(lockFlag){
+            redisCache.set(RedisKey.USER_INFO + id, user);
+            redisLock.unlock(lockKey, value);
+        }
+        return 0;
     }
 }

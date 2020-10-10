@@ -40,4 +40,16 @@ public class UserController {
         map.put("data", result);
         return map;
     }
+
+    /**
+     * 测试redis分布式锁
+     * */
+    @PostMapping("/update")
+    public Map<String, Object> update(@RequestBody User user){
+        int result = userService.update(user);
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", 1000);
+        map.put("data", result);
+        return map;
+    }
 }
