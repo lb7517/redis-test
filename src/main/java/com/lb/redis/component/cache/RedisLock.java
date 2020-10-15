@@ -18,8 +18,9 @@ public class RedisLock {
     @Autowired
     private RedisCache redisCache;
 
-    @Autowired
-    private RedissonClient redissonClient;
+    // todo 使用redisson不是这样做的，要通过组件实例化bean
+//    @Autowired
+//    private RedissonClient redissonClient;
 
     /**
      * 加锁(这里对setnx即setIfAbsent时候的线程中断或者其他异常导致的死锁进行了相应的处理)
