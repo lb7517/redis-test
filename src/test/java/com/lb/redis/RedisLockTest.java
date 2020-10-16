@@ -30,6 +30,7 @@ public class RedisLockTest extends RedisTestApplicationTests {
 
     // 请求数量
     private static int requestNums = 100;
+    // 统计访问次数，线程原子对象
     private static AtomicInteger num = new AtomicInteger(0);
 
     @Test
