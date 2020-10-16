@@ -54,7 +54,7 @@ public class RedisLock {
         if(!StringUtils.isEmpty(currentValue) && currentValue.equals(value)) {
             boolean result = redisCache.del(key);
             if(result){
-                log.info("解锁成功");
+                log.info("解锁成功 value: " + value);
             }
         }
     }
