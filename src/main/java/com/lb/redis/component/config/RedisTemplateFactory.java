@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
@@ -18,7 +19,9 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : lb
@@ -28,20 +31,38 @@ import java.util.List;
 @Configuration
 public class RedisTemplateFactory {
 
-    @Value("${spring.redis.sentinel.master}")
+    // 哨兵
+    /*@Value("${spring.redis.sentinel.master}")
     private String sentinelName;
 
-    /*@Value("${spring.redis.password}")
-    private String password;*/
+    *//*@Value("${spring.redis.password}")
+    private String password;*//*
 
     @Value("${spring.redis.sentinel.nodes}")
-    private String[] sentinels;
+    private String[] sentinels;*/
 
+    // 集群
+    @Value("${spring.redis.cluster.nodes}")
+    private String[] nodes;
+
+    /**
+     * Lettuce客户端整合(集群模式)
+     * */
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
+        RedisClusterConfiguration rcc= new RedisClusterConfiguration();
+        for (String node : nodes) {
+            String[] nodes = node.split(":");
+            rcc.addClusterNode(new RedisNode(nodes[0], Integer.parseInt(nodes[1])));
+        }
+//        rsc.setPassword(password);
+        return new LettuceConnectionFactory(rcc);
+    }
 
     /**
      * Lettuce客户端整合(哨兵模式)
      * */
-    @Bean
+   /* @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         RedisSentinelConfiguration rsc= new RedisSentinelConfiguration();
         rsc.setMaster(sentinelName);
@@ -53,7 +74,7 @@ public class RedisTemplateFactory {
         rsc.setSentinels(redisNodeList);
 //        rsc.setPassword(password);
         return new LettuceConnectionFactory(rsc);
-    }
+    }*/
 
     /**
      * 作用防止入缓存乱码,使用 lettuce 实现redis线程池

@@ -119,11 +119,11 @@ public class RedisCache {
     }
 
     /**
-     * 添加多条对象，事务添加
+     * 添加多条对象，事务添加(redis-cluster 多节点集群不支持)
      * */
     public void putObjects(String key, Map obj){
         //大key， 小key, 值
-        SessionCallback sessionCallback = new SessionCallback() {
+        /*SessionCallback sessionCallback = new SessionCallback() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
                 operations.multi();
@@ -132,7 +132,8 @@ public class RedisCache {
                 return result;
             }
         };
-        redisTemplate.execute(sessionCallback);
+        redisTemplate.execute(sessionCallback);*/
+        redisTemplate.opsForHash().putAll(key, obj);
     }
 
     /**

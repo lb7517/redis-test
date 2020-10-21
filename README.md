@@ -29,6 +29,13 @@
 2. 注意 application.properties 哨兵的配置和 RedisTemplateFactory中LettuceConnectionFactory工程的实例化bean,把哨兵注入
 
 
+* * *
+**集群模式**
+
+1. 注意RedisTemplateFactory.redisConnectionFactory的方法实现，初始化集群工厂
+2. 注意 application.properties 加入spring.redis.cluster.nodes节点信息
+3. 注**意集群模式不支持multi/execute事务**
+
 [git地址](https://github.com/lb7517/redis-test.git)
 
 目前还缺GenericJackson2JsonRedisSerializer和Jackson2JsonRedisSerializer区别
