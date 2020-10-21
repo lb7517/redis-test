@@ -4,15 +4,21 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisNode;
+import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author : lb
@@ -21,6 +27,33 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  */
 @Configuration
 public class RedisTemplateFactory {
+
+    @Value("${spring.redis.sentinel.master}")
+    private String sentinelName;
+
+    /*@Value("${spring.redis.password}")
+    private String password;*/
+
+    @Value("${spring.redis.sentinel.nodes}")
+    private String[] sentinels;
+
+
+    /**
+     * Lettuce客户端整合(哨兵模式)
+     * */
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
+        RedisSentinelConfiguration rsc= new RedisSentinelConfiguration();
+        rsc.setMaster(sentinelName);
+        List<RedisNode> redisNodeList= new ArrayList<>();
+        for (String sentinel : sentinels) {
+            String[] nodes = sentinel.split(":");
+            redisNodeList.add(new RedisNode(nodes[0], Integer.parseInt(nodes[1])));
+        }
+        rsc.setSentinels(redisNodeList);
+//        rsc.setPassword(password);
+        return new LettuceConnectionFactory(rsc);
+    }
 
     /**
      * 作用防止入缓存乱码,使用 lettuce 实现redis线程池

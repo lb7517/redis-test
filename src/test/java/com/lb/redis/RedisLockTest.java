@@ -29,7 +29,7 @@ public class RedisLockTest extends RedisTestApplicationTests {
 
 
     // 请求数量
-    private static int requestNums = 100;
+    private static int requestNums = 10000;
     // 统计访问次数，线程原子对象
     private static AtomicInteger num = new AtomicInteger(0);
 
@@ -38,9 +38,9 @@ public class RedisLockTest extends RedisTestApplicationTests {
         // 不加任何锁
 //        noRedisLock();
         // 使用redisLock
-//        redisLock();
+        redisLock();
         // 使用java synchronized
-        synchronizedLock();
+//        synchronizedLock();
     }
 
     /**
