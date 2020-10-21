@@ -23,6 +23,10 @@
 *  redisLock()测试方式使用的setnx redis指令实现(分布式锁)，使用单进程和多进程；(**1. 此处使用redis setnx指令实现； 2. 也可以使用Redission实现，这种方式可以规避服务宕机使用setnx指令加锁异常**)
 
 
+* * *
+**哨兵主从模式**
+1. 哨兵原始配置文件: document -> sentinel.conf
+2. 注意 application.properties 哨兵的配置和 RedisTemplateFactory中LettuceConnectionFactory工程的实例化bean,把哨兵注入
 
 
 [git地址](https://github.com/lb7517/redis-test.git)
