@@ -3,6 +3,8 @@ package com.lb.redis.pub.sub.config;
 import com.lb.redis.pub.sub.MsgListenter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -23,7 +25,8 @@ public class SubConfig {
     }
 
     @Bean
-    RedisMessageListenerContainer redisMessageListenerContainer(LettuceConnectionFactory factory) {
+    RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory factory) {
+//    RedisMessageListenerContainer redisMessageListenerContainer(JedisConnectionFactory factory) {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
         container.addMessageListener(messageListenerAdapter(), new ChannelTopic("pubsub:queue"));

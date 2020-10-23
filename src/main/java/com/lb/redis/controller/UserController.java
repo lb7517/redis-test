@@ -2,6 +2,7 @@ package com.lb.redis.controller;
 
 import com.lb.redis.entity.User;
 import com.lb.redis.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,10 +19,13 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
 
     @Resource
     UserService userService;
+
+    int a = 0;
 
     @PostMapping("/add")
     public Map<String, Object> insert(@RequestBody User user){
@@ -29,6 +33,8 @@ public class UserController {
         Map<String, Object> map = new HashMap<>();
         map.put("code", 1000);
         map.put("data", result);
+        a++;
+        log.info("a: {}", a);
         return map;
     }
 

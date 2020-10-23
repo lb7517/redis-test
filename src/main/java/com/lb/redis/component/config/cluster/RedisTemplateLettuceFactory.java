@@ -1,16 +1,24 @@
-package com.lb.redis.component.config;
+package com.lb.redis.component.config.cluster;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.lb.redis.component.cache.ShareClusterRedisProperties;
+import io.lettuce.core.TimeoutOptions;
+import io.lettuce.core.cluster.ClusterClientOptions;
+import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
+import io.lettuce.core.resource.ClientResources;
+import io.lettuce.core.resource.DefaultClientResources;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
-import org.springframework.data.redis.connection.RedisSentinelConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -18,18 +26,18 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
 
 /**
  * @author : lb
  * @date : 2020/9/11 14:44
- * @description : 实例化redisTemplate类
+ * @description : 实例化redisTemplate类, 使用lettuce连接池  (redis-cluster集群模式)
  */
 @Configuration
-public class RedisTemplateFactory {
+public class RedisTemplateLettuceFactory {
+
+    @Autowired
+    ShareClusterRedisProperties redisProperties;
 
     // 哨兵
     /*@Value("${spring.redis.sentinel.master}")
@@ -45,19 +53,47 @@ public class RedisTemplateFactory {
     @Value("${spring.redis.cluster.nodes}")
     private String[] nodes;
 
+    @Bean
+    public DefaultClientResources lettuceClientResources() {
+        return DefaultClientResources.create();
+    }
+
     /**
-     * Lettuce客户端整合(集群模式)
+     * Lettuce客户端整合(集群模式) 方式一:
      * */
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory() {
+    // 拓扑刷新策略 ，redis-cluster集群模式，master宕机不能切换服务问题(配合方式一使用):
+    @ConditionalOnProperty(name = "spring.redis.lettuce.cluster.refresh.adaptive.enabled", havingValue = "false")
+    public LettuceConnectionFactory redisConnectionFactory(RedisProperties redisProperties, ClientResources clientResources) {
+        // 拓扑刷新策略 ，redis-cluster集群模式，master宕机不能切换服务问题，解决方法方式二:
+        /*ClusterTopologyRefreshOptions topologyRefreshOptions = ClusterTopologyRefreshOptions.builder()
+                //开启定时刷新, 按照周期刷新拓扑, 默认30s
+                .enablePeriodicRefresh(Duration.ofSeconds(30))
+                //开启自适应刷新, 根据事件刷新拓扑
+                .enableAllAdaptiveRefreshTriggers()
+                .build();
+
+        ClusterClientOptions clusterClientOptions = ClusterClientOptions.builder()
+                //redis命令超时时间,超时后才会使用新的拓扑信息重新建立连接
+                .timeoutOptions(TimeoutOptions.enabled(Duration.ofSeconds(10)))  // 暂时不知道作用，不写也可以
+                .topologyRefreshOptions(topologyRefreshOptions)
+                .build();
+
+        LettuceClientConfiguration clientConfiguration = LettuceClientConfiguration.builder()
+                .clientResources(clientResources) // 暂时不知道作用， 不写也可以
+                .clientOptions(clusterClientOptions)
+                .build();*/
+
         RedisClusterConfiguration rcc= new RedisClusterConfiguration();
         for (String node : nodes) {
             String[] nodes = node.split(":");
             rcc.addClusterNode(new RedisNode(nodes[0], Integer.parseInt(nodes[1])));
         }
 //        rsc.setPassword(password);
+//        return new LettuceConnectionFactory(rcc, clientConfiguration);
         return new LettuceConnectionFactory(rcc);
     }
+
 
     /**
      * Lettuce客户端整合(哨兵模式)

@@ -1,6 +1,6 @@
 package com.lb.redis.service.impl;
 import com.lb.redis.component.cache.RedisCache;
-import com.lb.redis.component.cache.RedisLock;
+import com.lb.redis.component.lock.RedisLock;
 import com.lb.redis.constant.RedisKey;
 import com.lb.redis.entity.User;
 import com.lb.redis.service.UserService;

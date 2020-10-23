@@ -1,6 +1,6 @@
 package com.lb.redis;
 
-import com.lb.redis.component.cache.RedisLock;
+import com.lb.redis.component.lock.RedisLock;
 import com.lb.redis.service.RedisServiceTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,15 +88,11 @@ public class RedisLockTest extends RedisTestApplicationTests {
         Long startTime = System.currentTimeMillis();
         for(int i = 0; i < requestNums; i++){
             poolExecutor.execute( () -> {
-                /*try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
-                System.out.println("num: " + num.incrementAndGet());
-                while(redisServiceTest.buyTicket() == 0){
+//                while(redisServiceTest.buyTicketByLuaLock() == 0){
+                while(redisServiceTest.buyTicketByRedLock() == 0){
                     System.out.println("线程: "+ Thread.currentThread().getName() + " 等待获取锁");
                 }
+                System.out.println("num: " + num.incrementAndGet());
                 cdl.countDown();
             });
         }

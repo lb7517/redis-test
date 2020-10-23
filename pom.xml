@@ -23,6 +23,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+            <!--剔除默认的lettuce连接-->
+            <!--<exclusions>-->
+                <!--<exclusion>-->
+                    <!--<groupId>io.lettuce</groupId>-->
+                    <!--<artifactId>lettuce-core</artifactId>-->
+                <!--</exclusion>-->
+            <!--</exclusions>-->
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
         </dependency>
 
         <!--redis分布式锁-->
